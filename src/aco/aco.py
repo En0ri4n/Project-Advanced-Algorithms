@@ -8,10 +8,12 @@ from src.objects.truck import Truck
 class ACO:
     costs: np.ndarray
 
-    def __init__(self, customers, depot, truck_count, truck_capacity, pheromone_importance=1.0, heuristic_importance=2.0, evaporation_rate=0.1, pheromone_init=1.0, iterations=100, ants_count=10,
+    def __init__(self, customers, truck_count, truck_capacity, pheromone_importance=1.0, heuristic_importance=2.0, evaporation_rate=0.1, pheromone_init=1.0, iterations=100, ants_count=10,
                  debug=False):
+        vars.distance_matrix = cdist([[customer.x_coord, customer.y_coord] for customer in customers], [[customer.x_coord, customer.y_coord] for customer in customers], 'euclidean')
+
+        self.depot = customers.pop(0)
         self.customers = customers
-        self.depot = depot
         self.truck_count = truck_count
         self.truck_capacity = truck_capacity
         self.pheromone_importance = pheromone_importance
@@ -22,7 +24,6 @@ class ACO:
         self.ants_count = ants_count
         self.pheromone = np.full((len(customers) + 1, len(customers) + 1), pheromone_init)
 
-        vars.distance_matrix = cdist([[customer.x_coord, customer.y_coord] for customer in customers], [[customer.x_coord, customer.y_coord] for customer in customers], 'euclidean')
         self.costs = np.array([])
         self.debug = debug
 
