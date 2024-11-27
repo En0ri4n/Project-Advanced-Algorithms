@@ -12,12 +12,8 @@ class NNO:
         """
         Solves the vehicle routing problem using the nearest neighbor heuristic.
 
-        Parameters:
-        customers (list): List of customer objects.
-        depot (object): The depot (warehouse) object.
-
         Returns:
-        float: The total distance traveled by the trucks.
+        float: The total distance traveled by the truck.
         """
         unvisited = self.customers[:]
         total_distance = 0
@@ -26,7 +22,7 @@ class NNO:
         while unvisited:
             nearest = min(unvisited, key=lambda customer: current.distance_to(customer))
             route.append(nearest)
-            total_distance += nearest.distance_to(nearest)
+            total_distance += current.distance_to(nearest)
             current = nearest
             unvisited.remove(nearest)
         total_distance += current.distance_to(self.depot)
