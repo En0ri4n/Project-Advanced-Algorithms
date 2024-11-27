@@ -1,5 +1,6 @@
 import src.variables as vars
 
+
 class Customer:
     """
     Represents a customer in the vehicle routing problem.
@@ -33,6 +34,8 @@ class Customer:
         Returns:
             float: The distance to the other customer.
         """
+        if self.cust_no >= len(vars.distance_matrix) or other.cust_no >= len(vars.distance_matrix):
+            raise IndexError(f"Customer number {self.cust_no} or {other.cust_no} is out of bounds for distance matrix of size {len(vars.distance_matrix)}")
         return vars.distance_matrix[self.cust_no][other.cust_no]
 
     def __str__(self):

@@ -23,6 +23,7 @@ colors = [
     "#808080"  # Gray
 ]
 
+
 def plot_routes(solution, depot):
     plt.figure(figsize=(10, 8))
     for i in range(len(solution)):
@@ -100,7 +101,8 @@ def print_truck_usage(solution, depot, show_graphics=True):
     print(f"Total number of trucks used: {truck_count}")  # Print the total number of trucks used
     print(f"Max distance: {max_distance:.2f}")  # Print the total number of trucks
     print(f"Max global time: {max_global_time:.2f}")  # Print the total number of trucks used
-    print("\n" * 3)
+    print('-' * 100)
+    print("\n" * 1)
 
 
 # Plot the cost history of the ACO algorithm with each iteration

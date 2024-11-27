@@ -1,5 +1,6 @@
 import random
 
+
 class Ant:
     def __init__(self, customers, depot, trucks):
         """
@@ -62,8 +63,7 @@ class Ant:
         """
         feasible_customers = [
             c for c in unvisited
-            if truck.load + c.demand <= truck.capacity
-               and truck.time + truck.route[-1].distance_to(c) + c.service_time + c.distance_to(self.depot) <= self.depot.due_date
+            if truck.load + c.demand <= truck.capacity and truck.time + truck.route[-1].distance_to(c) + c.service_time + c.distance_to(self.depot) <= self.depot.due_date
         ]
         if not feasible_customers:
             return None

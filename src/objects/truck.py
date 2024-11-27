@@ -8,6 +8,7 @@ class Truck:
         load (int): The current load of the truck.
         time (int): The current time of the truck.
     """
+
     def __init__(self, capacity):
         self.capacity = capacity
         self.route = []
