@@ -5,6 +5,7 @@ import src.variables as vars
 from src.aco.ant import Ant
 from src.objects.truck import Truck
 
+
 class ACO:
     costs: np.ndarray
 
@@ -58,7 +59,7 @@ class ACO:
 
             self.update_pheromone(ants)
 
-        return best_solution, best_cost
+        return self.remove_unused_trucks(best_solution), best_cost  # Return the best solution and its cost (removing unused trucks)
 
     def construct_and_evaluate(self, ant):
         ant.construct_solution(self.pheromone, self.pheromone_importance, self.heuristic_importance)
