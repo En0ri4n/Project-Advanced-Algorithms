@@ -36,13 +36,16 @@ class Ant:
                 if next_customer is None:
                     break
                 travel_time_to_next = truck.route[-1].distance_to(next_customer)
+                arrival_time = truck.time + travel_time_to_next
+                if arrival_time < next_customer.ready_time:
+                    arrival_time = next_customer.ready_time  # Wait until the customer's ready time
                 travel_time_to_depot = next_customer.distance_to(self.depot)
                 # Check if adding the next customer allows the truck to return on time
-                if truck.time + travel_time_to_next + next_customer.service_time + travel_time_to_depot > self.depot.due_date:
+                if arrival_time + next_customer.service_time + travel_time_to_depot > self.depot.due_date:
                     break
                 truck.route.append(next_customer)
                 truck.load += next_customer.demand
-                truck.time += travel_time_to_next + next_customer.service_time
+                truck.time = arrival_time + next_customer.service_time
                 unvisited.remove(next_customer)
             truck.route.append(self.depot)  # Return to the depot
         self.solution = [truck.route for truck in self.trucks]
@@ -63,7 +66,9 @@ class Ant:
         """
         feasible_customers = [
             c for c in unvisited
-            if truck.load + c.demand <= truck.capacity and truck.time + truck.route[-1].distance_to(c) + c.service_time + c.distance_to(self.depot) <= self.depot.due_date
+            if truck.load + c.demand <= truck.capacity and
+               truck.time + truck.route[-1].distance_to(c) <= c.due_date and
+               c.ready_time + c.service_time + c.distance_to(self.depot) <= self.depot.due_date
         ]
         if not feasible_customers:
             return None
