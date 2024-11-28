@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import requests
 
 colors = [
     "#0000FF",  # Blue
@@ -86,6 +87,18 @@ def print_truck_usage(solution, depot, show_graphics=True):
                 plt.grid(True)
                 plt.legend()
                 plt.show()
+
+
+def print_optimal_solution_online(file_name: str):
+    url = f"http://vrp.galgos.inf.puc-rio.br/media/com_vrp/instances/Solomon/{file_name.upper().split('.')[0].split('/')[-1]}.sol"
+    print(f"Checking for optimal solution online at: {url}")
+
+    req = requests.get(url)
+    if req.status_code == 200:
+        print("Optimal solution found online:")
+        print(req.content.split(b'\n')[-2].decode())
+    else:
+        print(f"[{req.status_code}] No optimal solution found online.")
 
 
 def print_aco_solution(truck_count, total_distance_used, total_time_used):
