@@ -1,7 +1,7 @@
 import concurrent.futures
 import numpy as np
 from scipy.spatial.distance import cdist
-import src.variables as vars
+import src.variables as algo_vars
 from src.aco.ant import Ant
 from src.objects.truck import Truck
 
@@ -11,7 +11,7 @@ class ACO:
 
     def __init__(self, customers, truck_count, truck_capacity, pheromone_importance=1.0, heuristic_importance=2.0, evaporation_rate=0.1, pheromone_init=1.0, iterations=100, ants_count=10,
                  debug=False):
-        vars.distance_matrix = cdist([[customer.x_coord, customer.y_coord] for customer in customers], [[customer.x_coord, customer.y_coord] for customer in customers], 'euclidean')
+        algo_vars.distance_matrix = cdist([[customer.x_coord, customer.y_coord] for customer in customers], [[customer.x_coord, customer.y_coord] for customer in customers], 'euclidean')
 
         self.depot = customers.pop(0)
         self.customers = customers
@@ -24,6 +24,9 @@ class ACO:
         self.iterations = iterations
         self.ants_count = ants_count
         self.pheromone = np.full((len(customers) + 1, len(customers) + 1), pheromone_init)
+
+        self.best_solution = None
+
 
         self.costs = np.array([])
         self.debug = debug
@@ -59,7 +62,28 @@ class ACO:
 
             self.update_pheromone(ants)
 
-        return self.remove_unused_trucks(best_solution), best_cost  # Return the best solution and its cost (removing unused trucks)
+        self.best_solution = best_solution
+
+    def get_results(self):
+        """
+        Get the results of the ACO algorithm.\n
+        /!\\\ You need to run the ACO algorithm first before calling this function. /!\\\\
+
+        :return:
+            costs (np.ndarray): The costs of the ACO algorithm at each iteration.
+            best_solution (list): The best solution found by the ACO algorithm.
+            truck_count (list): The number of trucks used in the best solution.
+            total_distance (float): The total distance of the best solution.
+            total_time (float): The total time of the best solution
+        """
+
+        best_solution_reduced = self.remove_unused_trucks(self.best_solution)
+
+        truck_count = len([len(route) for route in best_solution_reduced if len(route) > 2])
+        total_distance = sum(sum(route[i].distance_to(route[i + 1]) for i in range(len(route) - 1)) for route in best_solution_reduced)
+        total_time = sum(sum(customer.service_time for customer in route[1:-1]) + sum(route[i].distance_to(route[i + 1]) for i in range(len(route) - 1)) for route in best_solution_reduced)
+
+        return self.customers, self.depot, self.costs, best_solution_reduced, truck_count, total_distance, total_time
 
     def construct_and_evaluate(self, ant):
         ant.construct_solution(self.pheromone, self.pheromone_importance, self.heuristic_importance)

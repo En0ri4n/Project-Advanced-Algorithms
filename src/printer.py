@@ -52,25 +52,15 @@ def print_truck_usage(solution, depot, show_graphics=True):
     solution (list): A list of routes, where each route is a list of customers.
     depot (Customer): The depot (warehouse) object.
     """
-    truck_count = 0  # Initialize the truck count
-    max_global_time = 0  # Initialize the total time
-    max_distance = 0  # Initialize the total distance
 
     for i, route in enumerate(solution):  # Iterate over each route in the solution
         load = sum(customer.demand for customer in route[1:-1])  # Calculate the load for the current route
         if load > 0:  # If the load is greater than 0
-            truck_count += 1  # Increment the truck count
-
             # Calculate the total distance for the current route
             total_distance = sum(route[j].distance_to(route[j + 1]) for j in range(len(route) - 1))
 
             # Calculate the total time for the current route
             total_time = sum(customer.service_time for customer in route[1:-1]) + total_distance  # Assuming time is proportional to distance
-
-            if max_global_time < total_time:
-                max_global_time = total_time
-
-            max_distance += total_distance
 
             if show_graphics:
                 # Print the details for the current truck
@@ -97,10 +87,12 @@ def print_truck_usage(solution, depot, show_graphics=True):
                 plt.legend()
                 plt.show()
 
+
+def print_aco_solution(truck_count, total_distance_used, total_time_used):
     print('-' * 100)
     print(f"Total number of trucks used: {truck_count}")  # Print the total number of trucks used
-    print(f"Max distance: {max_distance:.2f}")  # Print the total number of trucks
-    print(f"Max global time: {max_global_time:.2f}")  # Print the total number of trucks used
+    print(f"Max distance: {total_distance_used:.2f}")  # Print the total number of trucks
+    print(f"Max global time: {total_time_used:.2f}")  # Print the total number of trucks used
     print('-' * 100)
     print("\n" * 1)
 
