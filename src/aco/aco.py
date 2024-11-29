@@ -10,7 +10,7 @@ class ACO:
     costs: np.ndarray
 
     def __init__(self, customers, truck_count, truck_capacity, pheromone_importance=1.0, heuristic_importance=2.0, evaporation_rate=0.1, pheromone_init=1.0, iterations=100, ants_count=10,
-                 debug=False):
+                 do_stagnation_fuse=False, debug=False):
         algo_vars.distance_matrix = cdist([[customer.x_coord, customer.y_coord] for customer in customers], [[customer.x_coord, customer.y_coord] for customer in customers], 'euclidean')
 
         self.depot = customers.pop(0)
@@ -27,8 +27,8 @@ class ACO:
 
         self.best_solution = None
 
-
         self.costs = np.array([])
+        self.do_stagnation_fuse = do_stagnation_fuse
         self.debug = debug
 
     def remove_unused_trucks(self, solution):
@@ -39,30 +39,57 @@ class ACO:
 
         best_solution = None
         best_cost = float('inf')
+        stagnation_count = 0
+        max_stagnation = self.iterations // 10  # Number of iterations to allow without improvement
 
-        for _ in range(self.iterations):
-
+        for iteration in range(self.iterations):
             ants = [Ant(self.customers, self.depot, [Truck(self.truck_capacity) for _ in range(self.truck_count)]) for _ in range(self.ants_count)]
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            iteration_best_cost = float('inf')
+            iteration_best_solution = None
 
+            with concurrent.futures.ThreadPoolExecutor() as executor:
                 futures = [executor.submit(self.construct_and_evaluate, ant) for ant in ants]
 
                 for future in concurrent.futures.as_completed(futures):
                     cost, solution = future.result()
 
                     if self.debug:
-                        print(f"Solution found, Cost: {cost:.2f} ({int(cost < best_cost)})")
+                        print(f"Iteration {iteration + 1}, Solution found, Cost: {cost:.2f}")
 
                     self.costs = np.append(self.costs, cost)
 
-                    if cost < best_cost:
-                        best_cost = cost
-                        best_solution = solution
+                    if cost < iteration_best_cost:
+                        iteration_best_cost = cost
+                        iteration_best_solution = solution
+
+            # Update global best solution if current iteration finds a better one
+            if iteration_best_cost < best_cost:
+                best_cost = iteration_best_cost
+                best_solution = iteration_best_solution
+                stagnation_count = 0  # Reset stagnation counter on improvement
+            else:
+                stagnation_count += 1
 
             self.update_pheromone(ants)
 
+            # Check for stagnation at iteration level
+            if stagnation_count >= max_stagnation and self.do_stagnation_fuse:
+                print(f"Stagnation detected at iteration {iteration + 1}. Fusing pheromone matrices.")
+                self.fuse_pheromone_matrices()
+                stagnation_count = 0  # Reset stagnation counter
+
         self.best_solution = best_solution
+
+    def fuse_pheromone_matrices(self):
+        """
+        Fuses the current pheromone matrix with a new, reset matrix to retain some learned behavior
+        while encouraging exploration.
+        """
+        reset_pheromone = np.full(self.pheromone.shape, self.pheromone_init)  # Freshly reset pheromone matrix
+        fusion_weight = 0.8  # Weight for combining old and new matrices (0.5 gives equal weight)
+
+        self.pheromone = fusion_weight * self.pheromone + (1 - fusion_weight) * reset_pheromone
 
     def get_results(self):
         """
