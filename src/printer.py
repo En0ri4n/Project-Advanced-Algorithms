@@ -104,8 +104,8 @@ def print_optimal_solution_online(file_name: str):
 def print_aco_solution(truck_count, total_distance_used, total_time_used):
     print('-' * 100)
     print(f"Total number of trucks used: {truck_count}")  # Print the total number of trucks used
-    print(f"Max distance: {total_distance_used:.2f}")  # Print the total number of trucks
-    print(f"Max global time: {total_time_used:.2f}")  # Print the total number of trucks used
+    print(f"Shortest Path Length: {total_distance_used:.2f}")  # Print the total number of trucks
+    print(f"Time taken: {total_time_used:.2f}")  # Print the total number of trucks used
     print('-' * 100)
     print("\n" * 1)
 
